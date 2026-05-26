@@ -102,3 +102,6 @@ matador:
     max-booking-days: 30
     pickup-lead-time-minutes: 120
     no-show-after-minutes: 120
+    cancellation-full-refund-hours: 24
+    cancellation-partial-hours: 2
+    cancellation-partial-percent-bps: 5000

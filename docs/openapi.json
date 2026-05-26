@@ -1,0 +1,4718 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Matador API",
+    "description": "Matador on-demand car rental API. Customer endpoints use JWT bearer tokens; admin endpoints use session cookies.",
+    "version": "v1"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/api/webhooks/stripe": {
+      "post": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Stripe webhook",
+        "description": "Handle Stripe payment events.",
+        "operationId": "handle",
+        "parameters": [
+          {
+            "name": "Stripe-Signature",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/webhooks/stripe-identity": {
+      "post": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Stripe Identity webhook",
+        "description": "Handle identity verification events.",
+        "operationId": "handle_1",
+        "parameters": [
+          {
+            "name": "Stripe-Signature",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/customer/me/verification": {
+      "get": {
+        "tags": [
+          "Customer-Profile"
+        ],
+        "summary": "Verification status",
+        "description": "Status of the latest verification session.",
+        "operationId": "status",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerificationResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Customer-Profile"
+        ],
+        "summary": "Start verification",
+        "description": "Begin an identity verification session; returns a client_secret.",
+        "operationId": "start",
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/me/trips/{id}/inspections/{phase}": {
+      "post": {
+        "tags": [
+          "Customer-Trips"
+        ],
+        "summary": "Submit inspection",
+        "description": "Submit an inspection with all photo URLs.",
+        "operationId": "submit",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "phase",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PICKUP",
+                "DROPOFF"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitInspectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InspectionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/me/trips/{id}/inspections/{phase}/upload-url": {
+      "post": {
+        "tags": [
+          "Customer-Trips"
+        ],
+        "summary": "Presign upload",
+        "description": "Get a presigned upload URL for a photo angle.",
+        "operationId": "uploadUrl",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "phase",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PICKUP",
+                "DROPOFF"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadUrlRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadUrlResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/me/trips/{id}/incidents": {
+      "post": {
+        "tags": [
+          "Customer-Trips"
+        ],
+        "summary": "Report incident",
+        "description": "Customer reports an incident on a trip.",
+        "operationId": "report",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncidentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/me/trips/{id}/end": {
+      "post": {
+        "tags": [
+          "Customer-Trips"
+        ],
+        "summary": "End trip",
+        "description": "End the active trip (awaiting dropoff inspection).",
+        "operationId": "end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TripResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/me/payment-methods": {
+      "get": {
+        "tags": [
+          "Customer-Profile"
+        ],
+        "summary": "List payment methods",
+        "description": "Saved cards for the customer.",
+        "operationId": "list",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PaymentMethodResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Customer-Profile"
+        ],
+        "summary": "Attach card",
+        "description": "Attach a confirmed payment method to the customer.",
+        "operationId": "attach",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachPaymentMethodRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentMethodResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/me/payment-methods/{id}/default": {
+      "post": {
+        "tags": [
+          "Customer-Profile"
+        ],
+        "summary": "Set default card",
+        "description": "Mark a payment method as default.",
+        "operationId": "setDefault",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/customer/me/payment-methods/setup": {
+      "post": {
+        "tags": [
+          "Customer-Profile"
+        ],
+        "summary": "Create setup intent",
+        "description": "Begin saving a card; returns client_secret.",
+        "operationId": "setup",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetupIntentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/me/addresses": {
+      "get": {
+        "tags": [
+          "Customer-Profile"
+        ],
+        "summary": "List addresses",
+        "description": "Saved addresses for the customer.",
+        "operationId": "addresses",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AddressResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Customer-Profile"
+        ],
+        "summary": "Add address",
+        "description": "Save a new address.",
+        "operationId": "addAddress",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddressRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/bookings": {
+      "get": {
+        "tags": [
+          "Customer-Bookings"
+        ],
+        "summary": "List bookings",
+        "description": "The customer's bookings.",
+        "operationId": "list_1",
+        "parameters": [
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageBookingResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Customer-Bookings"
+        ],
+        "summary": "Create booking",
+        "description": "Create a booking from a quote; places a deposit hold.",
+        "operationId": "create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBookingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/bookings/{id}/cancel": {
+      "post": {
+        "tags": [
+          "Customer-Bookings"
+        ],
+        "summary": "Cancel booking",
+        "description": "Cancel per the cancellation policy.",
+        "operationId": "cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/bookings/quote": {
+      "post": {
+        "tags": [
+          "Customer-Bookings"
+        ],
+        "summary": "Price quote",
+        "description": "Get a quote without creating a booking.",
+        "operationId": "quote",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuoteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuoteResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/auth/register": {
+      "post": {
+        "tags": [
+          "Customer-Auth"
+        ],
+        "summary": "Register",
+        "description": "Create a customer account and return tokens.",
+        "operationId": "register",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "409": {
+            "description": "Email or phone already in use",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Account created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed (age, password)",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/auth/refresh": {
+      "post": {
+        "tags": [
+          "Customer-Auth"
+        ],
+        "summary": "Refresh token",
+        "description": "Exchange a refresh token for new tokens.",
+        "operationId": "refresh",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Invalid or expired refresh token",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Refreshed",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/auth/login": {
+      "post": {
+        "tags": [
+          "Customer-Auth"
+        ],
+        "summary": "Login",
+        "description": "Authenticate with email and password.",
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/zones": {
+      "get": {
+        "tags": [
+          "Admin-Settings"
+        ],
+        "summary": "List zones",
+        "description": "All zones with GeoJSON boundaries.",
+        "operationId": "list_2",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ZoneResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin-Settings"
+        ],
+        "summary": "Create zone",
+        "description": "Create a zone from a GeoJSON polygon.",
+        "operationId": "create_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateZoneRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZoneResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/vehicles": {
+      "get": {
+        "tags": [
+          "Admin-Vehicles"
+        ],
+        "summary": "List vehicles",
+        "description": "Paginated, filterable fleet list.",
+        "operationId": "list_3",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "AVAILABLE",
+                "RESERVED",
+                "IN_PREPARATION",
+                "EN_ROUTE_TO_CUSTOMER",
+                "WITH_CUSTOMER",
+                "EN_ROUTE_TO_WAREHOUSE",
+                "AWAITING_INSPECTION",
+                "IN_CLEANING",
+                "IN_MAINTENANCE",
+                "OUT_OF_SERVICE",
+                "RETIRED"
+              ]
+            }
+          },
+          {
+            "name": "classId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "zoneId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageVehicleResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin-Vehicles"
+        ],
+        "summary": "Create vehicle",
+        "description": "Add a vehicle to the fleet.",
+        "operationId": "create_2",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVehicleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/vehicles/{id}/unlock": {
+      "post": {
+        "tags": [
+          "Admin-Vehicles"
+        ],
+        "summary": "Unlock vehicle",
+        "description": "Send an unlock command via telematics.",
+        "operationId": "unlock",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommandResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/vehicles/{id}/status": {
+      "post": {
+        "tags": [
+          "Admin-Vehicles"
+        ],
+        "summary": "Transition status",
+        "description": "Validated vehicle status transition.",
+        "operationId": "transition",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransitionStatusRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/vehicles/{id}/lock": {
+      "post": {
+        "tags": [
+          "Admin-Vehicles"
+        ],
+        "summary": "Lock vehicle",
+        "description": "Send a lock command via telematics.",
+        "operationId": "lock",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommandResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/vehicle-classes": {
+      "get": {
+        "tags": [
+          "Admin-Vehicles"
+        ],
+        "summary": "List vehicle classes",
+        "description": "All vehicle classes.",
+        "operationId": "list_4",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VehicleClassResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin-Vehicles"
+        ],
+        "summary": "Create vehicle class",
+        "description": "Create a vehicle class.",
+        "operationId": "create_3",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVehicleClassRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleClassResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/trips/{id}/close": {
+      "post": {
+        "tags": [
+          "Admin-Trips"
+        ],
+        "summary": "Close trip",
+        "description": "Close after inspection; computes final charges.",
+        "operationId": "close",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TripResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/pricing/rates": {
+      "post": {
+        "tags": [
+          "Admin-Settings"
+        ],
+        "summary": "Create rate",
+        "description": "Add a pricing rate for a vehicle class.",
+        "operationId": "createRate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/pricing/promos": {
+      "post": {
+        "tags": [
+          "Admin-Settings"
+        ],
+        "summary": "Create promo",
+        "description": "Create a promo code.",
+        "operationId": "createPromo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePromoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/ledger/adjustments": {
+      "post": {
+        "tags": [
+          "Admin-Ledger"
+        ],
+        "summary": "Manual adjustment",
+        "description": "Record a manual ledger adjustment.",
+        "operationId": "adjust",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdjustmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/inspections/{id}/review": {
+      "post": {
+        "tags": [
+          "Admin-Trips"
+        ],
+        "summary": "Review inspection",
+        "description": "Mark an inspection passed or flagged.",
+        "operationId": "review",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InspectionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/incidents": {
+      "get": {
+        "tags": [
+          "Admin-Incidents"
+        ],
+        "summary": "List incidents",
+        "description": "Filterable incidents list.",
+        "operationId": "list_6",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "OPEN",
+                "IN_REVIEW",
+                "RESOLVED",
+                "DISMISSED"
+              ]
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DAMAGE",
+                "OUT_OF_ZONE",
+                "LATE_RETURN",
+                "ACCIDENT",
+                "TICKET",
+                "OTHER"
+              ]
+            }
+          },
+          {
+            "name": "tripId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageIncidentResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin-Incidents"
+        ],
+        "summary": "Create incident",
+        "description": "Staff creates an incident.",
+        "operationId": "create_4",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StaffCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncidentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/bookings/{id}/cancel": {
+      "post": {
+        "tags": [
+          "Admin-Bookings"
+        ],
+        "summary": "Cancel booking",
+        "description": "Admin-initiated cancellation.",
+        "operationId": "cancel_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/bookings/{id}/assign-vehicle": {
+      "post": {
+        "tags": [
+          "Admin-Bookings"
+        ],
+        "summary": "Assign vehicle",
+        "description": "Assign a specific vehicle to a booking.",
+        "operationId": "assign",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignVehicleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/bookings/{id}/activate": {
+      "post": {
+        "tags": [
+          "Admin-Bookings"
+        ],
+        "summary": "Activate booking",
+        "description": "Activate a confirmed booking; starts a trip.",
+        "operationId": "activate",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/auth/logout": {
+      "post": {
+        "tags": [
+          "Admin-Settings"
+        ],
+        "summary": "Admin logout",
+        "description": "Invalidate the current staff session.",
+        "operationId": "logout",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/auth/login": {
+      "post": {
+        "tags": [
+          "Admin-Settings"
+        ],
+        "summary": "Admin login",
+        "description": "Authenticate a staff member; sets a session cookie.",
+        "operationId": "login_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/me": {
+      "get": {
+        "tags": [
+          "Customer-Profile"
+        ],
+        "summary": "Current profile",
+        "description": "Profile of the authenticated customer.",
+        "operationId": "me",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Customer-Profile"
+        ],
+        "summary": "Update profile",
+        "description": "Update name and phone. Email and date of birth are immutable.",
+        "operationId": "update",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/zones/{id}": {
+      "patch": {
+        "tags": [
+          "Admin-Settings"
+        ],
+        "summary": "Update zone",
+        "description": "Update fees, dropoff policy, or active flag.",
+        "operationId": "update_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateZoneRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZoneResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/vehicles/{id}": {
+      "get": {
+        "tags": [
+          "Admin-Vehicles"
+        ],
+        "summary": "Vehicle detail",
+        "description": "Full vehicle detail.",
+        "operationId": "get_2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Admin-Vehicles"
+        ],
+        "summary": "Update vehicle",
+        "description": "Update mutable vehicle fields.",
+        "operationId": "update_2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVehicleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/vehicle-classes/{id}": {
+      "patch": {
+        "tags": [
+          "Admin-Vehicles"
+        ],
+        "summary": "Update vehicle class",
+        "description": "Update a vehicle class.",
+        "operationId": "update_3",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVehicleClassRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleClassResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/incidents/{id}": {
+      "get": {
+        "tags": [
+          "Admin-Incidents"
+        ],
+        "summary": "Incident detail",
+        "description": "A single incident.",
+        "operationId": "get_5",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncidentResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Admin-Incidents"
+        ],
+        "summary": "Update incident",
+        "description": "Update status, resolution, and charges.",
+        "operationId": "update_4",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateIncidentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncidentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/customers/{id}": {
+      "get": {
+        "tags": [
+          "Admin-Customers"
+        ],
+        "summary": "Customer detail",
+        "description": "Full customer profile.",
+        "operationId": "detail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminCustomerDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Admin-Customers"
+        ],
+        "summary": "Update status",
+        "description": "Suspend, deactivate, or reactivate a customer.",
+        "operationId": "updateStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCustomerStatusRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminCustomerDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jwks.json": {
+      "get": {
+        "tags": [
+          "Customer-Auth"
+        ],
+        "summary": "JWKS",
+        "description": "RSA public key set for verifying customer JWTs.",
+        "operationId": "jwks",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/zones/contains": {
+      "get": {
+        "tags": [
+          "Customer-Vehicles"
+        ],
+        "summary": "Zone containment",
+        "description": "Which zone (if any) contains a point.",
+        "operationId": "contains",
+        "parameters": [
+          {
+            "name": "lat",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "lng",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZoneContainsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/zones": {
+      "get": {
+        "tags": [
+          "Customer-Vehicles"
+        ],
+        "summary": "Public zones",
+        "description": "Active zones for map display.",
+        "operationId": "publicZones",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PublicZoneResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/vehicles/available": {
+      "get": {
+        "tags": [
+          "Customer-Vehicles"
+        ],
+        "summary": "Available classes",
+        "description": "Bookable classes with counts and starting price for a window/location.",
+        "operationId": "available",
+        "parameters": [
+          {
+            "name": "pickupAt",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "dropoffAt",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "pickupLat",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "pickupLng",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AvailableClassResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/vehicle-classes": {
+      "get": {
+        "tags": [
+          "Customer-Vehicles"
+        ],
+        "summary": "Class catalog",
+        "description": "Active vehicle classes for customers.",
+        "operationId": "classes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VehicleClassResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/me/trips": {
+      "get": {
+        "tags": [
+          "Customer-Trips"
+        ],
+        "summary": "Trip history",
+        "description": "Paginated trip history.",
+        "operationId": "history",
+        "parameters": [
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageTripResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/me/trips/{id}": {
+      "get": {
+        "tags": [
+          "Customer-Trips"
+        ],
+        "summary": "Trip detail",
+        "description": "A single trip owned by the customer.",
+        "operationId": "get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TripResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/me/trips/current": {
+      "get": {
+        "tags": [
+          "Customer-Trips"
+        ],
+        "summary": "Current trip",
+        "description": "The customer's active trip, if any.",
+        "operationId": "current",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TripResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/bookings/{id}": {
+      "get": {
+        "tags": [
+          "Customer-Bookings"
+        ],
+        "summary": "Booking detail",
+        "description": "A single booking owned by the customer.",
+        "operationId": "get_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/trips": {
+      "get": {
+        "tags": [
+          "Admin-Trips"
+        ],
+        "summary": "List trips",
+        "description": "Filterable trips list.",
+        "operationId": "list_5",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "IN_PROGRESS",
+                "ENDED_PENDING_INSPECTION",
+                "CLOSED"
+              ]
+            }
+          },
+          {
+            "name": "customerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageTripResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/trips/{id}": {
+      "get": {
+        "tags": [
+          "Admin-Trips"
+        ],
+        "summary": "Trip detail",
+        "description": "A single trip.",
+        "operationId": "get_3",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TripResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/ledger/trips/{tripId}": {
+      "get": {
+        "tags": [
+          "Admin-Ledger"
+        ],
+        "summary": "Trip ledger",
+        "description": "All ledger entries for a trip.",
+        "operationId": "byTrip",
+        "parameters": [
+          {
+            "name": "tripId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LedgerEntryView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/ledger/customers/{customerId}": {
+      "get": {
+        "tags": [
+          "Admin-Ledger"
+        ],
+        "summary": "Customer ledger",
+        "description": "Paginated ledger history for a customer.",
+        "operationId": "byCustomer",
+        "parameters": [
+          {
+            "name": "customerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageLedgerEntryView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/inspections/{id}": {
+      "get": {
+        "tags": [
+          "Admin-Trips"
+        ],
+        "summary": "Inspection detail",
+        "description": "View an inspection with photos.",
+        "operationId": "get_4",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InspectionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/customers": {
+      "get": {
+        "tags": [
+          "Admin-Customers"
+        ],
+        "summary": "List customers",
+        "description": "Paginated, filterable customer list.",
+        "operationId": "list_7",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "phone",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "verificationStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "UNVERIFIED",
+                "IN_PROGRESS",
+                "VERIFIED",
+                "REJECTED",
+                "EXPIRED"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "SUSPENDED",
+                "DEACTIVATED"
+              ]
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageAdminCustomerSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/bookings": {
+      "get": {
+        "tags": [
+          "Admin-Bookings"
+        ],
+        "summary": "List bookings",
+        "description": "Filterable bookings list.",
+        "operationId": "list_8",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING_PAYMENT",
+                "CONFIRMED",
+                "ACTIVATED",
+                "COMPLETED",
+                "CANCELLED",
+                "NO_SHOW"
+              ]
+            }
+          },
+          {
+            "name": "customerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "vehicleId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageBookingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/bookings/{id}": {
+      "get": {
+        "tags": [
+          "Admin-Bookings"
+        ],
+        "summary": "Booking detail",
+        "description": "A single booking.",
+        "operationId": "get_6",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/auth/me": {
+      "get": {
+        "tags": [
+          "Admin-Settings"
+        ],
+        "summary": "Current staff",
+        "description": "Return the authenticated staff member.",
+        "operationId": "me_1",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customer/me/payment-methods/{id}": {
+      "delete": {
+        "tags": [
+          "Customer-Profile"
+        ],
+        "summary": "Detach card",
+        "description": "Remove a saved payment method.",
+        "operationId": "detach",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/customer/me/addresses/{id}": {
+      "delete": {
+        "tags": [
+          "Customer-Profile"
+        ],
+        "summary": "Remove address",
+        "description": "Delete a saved address.",
+        "operationId": "removeAddress",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "VerificationResponse": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "clientSecret": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "PROCESSING",
+              "VERIFIED",
+              "REQUIRES_INPUT",
+              "CANCELED"
+            ]
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PhotoSubmission": {
+        "required": [
+          "angle",
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "angle": {
+            "type": "string",
+            "enum": [
+              "FRONT",
+              "BACK",
+              "LEFT",
+              "RIGHT",
+              "INTERIOR_FRONT",
+              "INTERIOR_REAR",
+              "ODOMETER"
+            ]
+          },
+          "url": {
+            "type": "string"
+          },
+          "capturedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lat": {
+            "type": "number",
+            "format": "double"
+          },
+          "lng": {
+            "type": "number",
+            "format": "double"
+          },
+          "fileSizeBytes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "widthPx": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "heightPx": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SubmitInspectionRequest": {
+        "required": [
+          "photos"
+        ],
+        "type": "object",
+        "properties": {
+          "odometerMiles": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fuelChargePercent": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "photos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PhotoSubmission"
+            }
+          }
+        }
+      },
+      "InspectionResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tripId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "phase": {
+            "type": "string",
+            "enum": [
+              "PICKUP",
+              "DROPOFF"
+            ]
+          },
+          "odometerMiles": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fuelChargePercent": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reviewStatus": {
+            "type": "string",
+            "enum": [
+              "PASSED",
+              "FLAGGED"
+            ]
+          },
+          "photos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PhotoView"
+            }
+          }
+        }
+      },
+      "PhotoView": {
+        "type": "object",
+        "properties": {
+          "angle": {
+            "type": "string",
+            "enum": [
+              "FRONT",
+              "BACK",
+              "LEFT",
+              "RIGHT",
+              "INTERIOR_FRONT",
+              "INTERIOR_REAR",
+              "ODOMETER"
+            ]
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "UploadUrlRequest": {
+        "required": [
+          "angle"
+        ],
+        "type": "object",
+        "properties": {
+          "angle": {
+            "type": "string",
+            "enum": [
+              "FRONT",
+              "BACK",
+              "LEFT",
+              "RIGHT",
+              "INTERIOR_FRONT",
+              "INTERIOR_REAR",
+              "ODOMETER"
+            ]
+          },
+          "contentType": {
+            "type": "string"
+          }
+        }
+      },
+      "UploadUrlResponse": {
+        "type": "object",
+        "properties": {
+          "uploadUrl": {
+            "type": "string"
+          },
+          "publicUrl": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomerReportRequest": {
+        "required": [
+          "description",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "DAMAGE",
+              "OUT_OF_ZONE",
+              "LATE_RETURN",
+              "ACCIDENT",
+              "TICKET",
+              "OTHER"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "IncidentResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tripId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "vehicleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "DAMAGE",
+              "OUT_OF_ZONE",
+              "LATE_RETURN",
+              "ACCIDENT",
+              "TICKET",
+              "OTHER"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "LOW",
+              "MEDIUM",
+              "HIGH"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "IN_REVIEW",
+              "RESOLVED",
+              "DISMISSED"
+            ]
+          },
+          "chargedAmountCents": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "TripResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "vehicleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_PROGRESS",
+              "ENDED_PENDING_INSPECTION",
+              "CLOSED"
+            ]
+          },
+          "actualPickupAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actualDropoffAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "odometerStart": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "odometerEnd": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "milesDriven": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "finalChargesCents": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AttachPaymentMethodRequest": {
+        "required": [
+          "stripePaymentMethodId"
+        ],
+        "type": "object",
+        "properties": {
+          "stripePaymentMethodId": {
+            "type": "string"
+          },
+          "isDefault": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PaymentMethodResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "brand": {
+            "type": "string"
+          },
+          "last4": {
+            "type": "string"
+          },
+          "expMonth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "expYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isDefault": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SetupIntentResponse": {
+        "type": "object",
+        "properties": {
+          "setupIntentId": {
+            "type": "string"
+          },
+          "clientSecret": {
+            "type": "string"
+          }
+        }
+      },
+      "AddressRequest": {
+        "required": [
+          "city",
+          "lat",
+          "line1",
+          "lng",
+          "postalCode",
+          "state"
+        ],
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "line1": {
+            "type": "string"
+          },
+          "line2": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "state": {
+            "maxLength": 2,
+            "minLength": 2,
+            "type": "string"
+          },
+          "postalCode": {
+            "type": "string"
+          },
+          "country": {
+            "maxLength": 2,
+            "minLength": 2,
+            "type": "string"
+          },
+          "lat": {
+            "type": "number",
+            "format": "double"
+          },
+          "lng": {
+            "type": "number",
+            "format": "double"
+          },
+          "isDefault": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AddressResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "label": {
+            "type": "string"
+          },
+          "line1": {
+            "type": "string"
+          },
+          "line2": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "postalCode": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number",
+            "format": "double"
+          },
+          "lng": {
+            "type": "number",
+            "format": "double"
+          },
+          "isDefault": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreateBookingRequest": {
+        "required": [
+          "dropoffLat",
+          "dropoffLng",
+          "pickupLat",
+          "pickupLng",
+          "quoteId"
+        ],
+        "type": "object",
+        "properties": {
+          "quoteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pickupLat": {
+            "type": "number",
+            "format": "double"
+          },
+          "pickupLng": {
+            "type": "number",
+            "format": "double"
+          },
+          "pickupAddress": {
+            "type": "string"
+          },
+          "dropoffLat": {
+            "type": "number",
+            "format": "double"
+          },
+          "dropoffLng": {
+            "type": "number",
+            "format": "double"
+          },
+          "dropoffAddress": {
+            "type": "string"
+          },
+          "paymentMethodId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "BookingResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bookingNumber": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING_PAYMENT",
+              "CONFIRMED",
+              "ACTIVATED",
+              "COMPLETED",
+              "CANCELLED",
+              "NO_SHOW"
+            ]
+          },
+          "vehicleClassId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assignedVehicleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pickupAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dropoffAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "quotedTotalCents": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "depositAmountCents": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dropoffInZone": {
+            "type": "boolean"
+          },
+          "depositHoldClientSecret": {
+            "type": "string"
+          }
+        }
+      },
+      "CancelRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "QuoteRequest": {
+        "required": [
+          "dropoffAt",
+          "dropoffLat",
+          "dropoffLng",
+          "pickupAt",
+          "pickupLat",
+          "pickupLng",
+          "vehicleClassId"
+        ],
+        "type": "object",
+        "properties": {
+          "vehicleClassId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pickupAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dropoffAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pickupLat": {
+            "type": "number",
+            "format": "double"
+          },
+          "pickupLng": {
+            "type": "number",
+            "format": "double"
+          },
+          "dropoffLat": {
+            "type": "number",
+            "format": "double"
+          },
+          "dropoffLng": {
+            "type": "number",
+            "format": "double"
+          },
+          "insuranceTier": {
+            "type": "string"
+          },
+          "promoCode": {
+            "type": "string"
+          }
+        }
+      },
+      "LineItem": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "amountCents": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "QuoteResponse": {
+        "type": "object",
+        "properties": {
+          "quoteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dropoffInZone": {
+            "type": "boolean"
+          },
+          "lineItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LineItem"
+            }
+          },
+          "subtotalCents": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "discountCents": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "taxCents": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalCents": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "depositCents": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RegisterRequest": {
+        "required": [
+          "dateOfBirth",
+          "email",
+          "firstName",
+          "lastName",
+          "password",
+          "phone"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "password": {
+            "maxLength": 100,
+            "minLength": 12,
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "TokenResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "type": "string"
+          },
+          "expiresIn": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tokenType": {
+            "type": "string"
+          }
+        }
+      },
+      "RefreshRequest": {
+        "required": [
+          "refreshToken"
+        ],
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginRequest": {
+        "required": [
+          "email",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateZoneRequest": {
+        "required": [
+          "boundary",
+          "center",
+          "name",
+          "slug"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "boundary": {
+            "$ref": "#/components/schemas/PolygonGeoJson"
+          },
+          "center": {
+            "$ref": "#/components/schemas/PointGeoJson"
+          },
+          "outOfZoneDropoffFeeCents": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "outOfZoneDropoffAllowed": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PointGeoJson": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "coordinates": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            }
+          }
+        }
+      },
+      "PolygonGeoJson": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "coordinates": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "number",
+                  "format": "double"
+                }
+              }
+            }
+          }
+        }
+      },
+      "ZoneResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "boundary": {
+            "$ref": "#/components/schemas/PolygonGeoJson"
+          },
+          "center": {
+            "$ref": "#/components/schemas/PointGeoJson"
+          },
+          "outOfZoneDropoffFeeCents": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "outOfZoneDropoffAllowed": {
+            "type": "boolean"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreateVehicleRequest": {
+        "required": [
+          "acquiredOn",
+          "classId",
+          "color",
+          "homeZoneId",
+          "licensePlate",
+          "licenseState",
+          "make",
+          "model",
+          "vin"
+        ],
+        "type": "object",
+        "properties": {
+          "vin": {
+            "type": "string"
+          },
+          "licensePlate": {
+            "type": "string"
+          },
+          "licenseState": {
+            "maxLength": 2,
+            "minLength": 2,
+            "type": "string"
+          },
+          "make": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "year": {
+            "minimum": 1900,
+            "type": "integer",
+            "format": "int32"
+          },
+          "color": {
+            "type": "string"
+          },
+          "classId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "homeZoneId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "acquiredOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "telematicsProvider": {
+            "type": "string"
+          },
+          "telematicsVehicleId": {
+            "type": "string"
+          }
+        }
+      },
+      "VehicleResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "vin": {
+            "type": "string"
+          },
+          "licensePlate": {
+            "type": "string"
+          },
+          "licenseState": {
+            "type": "string"
+          },
+          "make": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "year": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "color": {
+            "type": "string"
+          },
+          "classId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "RESERVED",
+              "IN_PREPARATION",
+              "EN_ROUTE_TO_CUSTOMER",
+              "WITH_CUSTOMER",
+              "EN_ROUTE_TO_WAREHOUSE",
+              "AWAITING_INSPECTION",
+              "IN_CLEANING",
+              "IN_MAINTENANCE",
+              "OUT_OF_SERVICE",
+              "RETIRED"
+            ]
+          },
+          "lat": {
+            "type": "number",
+            "format": "double"
+          },
+          "lng": {
+            "type": "number",
+            "format": "double"
+          },
+          "currentAddress": {
+            "type": "string"
+          },
+          "odometerMiles": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fuelChargePercent": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rangeMiles": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "homeZoneId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "telematicsProvider": {
+            "type": "string"
+          },
+          "acquiredOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "retiredOn": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "CommandResponse": {
+        "type": "object",
+        "properties": {
+          "succeeded": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      },
+      "TransitionStatusRequest": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "RESERVED",
+              "IN_PREPARATION",
+              "EN_ROUTE_TO_CUSTOMER",
+              "WITH_CUSTOMER",
+              "EN_ROUTE_TO_WAREHOUSE",
+              "AWAITING_INSPECTION",
+              "IN_CLEANING",
+              "IN_MAINTENANCE",
+              "OUT_OF_SERVICE",
+              "RETIRED"
+            ]
+          }
+        }
+      },
+      "CreateVehicleClassRequest": {
+        "required": [
+          "drivetrain",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "seats": {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "luggageCapacity": {
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "drivetrain": {
+            "type": "string",
+            "enum": [
+              "ICE",
+              "HYBRID",
+              "EV"
+            ]
+          },
+          "baseDailyRateCents": {
+            "minimum": 0,
+            "type": "integer",
+            "format": "int64"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "VehicleClassResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "seats": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "luggageCapacity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "drivetrain": {
+            "type": "string",
+            "enum": [
+              "ICE",
+              "HYBRID",
+              "EV"
+            ]
+          },
+          "baseDailyRateCents": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreateRateRequest": {
+        "required": [
+          "insuranceTier",
+          "vehicleClassId"
+        ],
+        "type": "object",
+        "properties": {
+          "vehicleClassId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dailyRateCents": {
+            "minimum": 0,
+            "type": "integer",
+            "format": "int64"
+          },
+          "deliveryFeeCents": {
+            "minimum": 0,
+            "type": "integer",
+            "format": "int64"
+          },
+          "outOfZoneDropoffFeeCents": {
+            "minimum": 0,
+            "type": "integer",
+            "format": "int64"
+          },
+          "insuranceTier": {
+            "type": "string"
+          },
+          "insuranceDailyCents": {
+            "minimum": 0,
+            "type": "integer",
+            "format": "int64"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RateResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "vehicleClassId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dailyRateCents": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CreatePromoRequest": {
+        "required": [
+          "code",
+          "discountType"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "discountType": {
+            "type": "string"
+          },
+          "discountValue": {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxUses": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PromoResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "discountType": {
+            "type": "string"
+          },
+          "discountValue": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AdjustmentRequest": {
+        "required": [
+          "customerId",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "customerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tripId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amountCents": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "ReviewRequest": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "PASSED",
+              "FLAGGED"
+            ]
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "StaffCreateRequest": {
+        "required": [
+          "description",
+          "severity",
+          "type",
+          "vehicleId"
+        ],
+        "type": "object",
+        "properties": {
+          "tripId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "vehicleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "DAMAGE",
+              "OUT_OF_ZONE",
+              "LATE_RETURN",
+              "ACCIDENT",
+              "TICKET",
+              "OTHER"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "LOW",
+              "MEDIUM",
+              "HIGH"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AssignVehicleRequest": {
+        "required": [
+          "vehicleId"
+        ],
+        "type": "object",
+        "properties": {
+          "vehicleId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "StaffProfileResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "DISPATCHER",
+              "SUPPORT",
+              "READONLY",
+              "CUSTOMER"
+            ]
+          }
+        }
+      },
+      "UpdateProfileRequest": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomerProfileResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date"
+          },
+          "verificationStatus": {
+            "type": "string",
+            "enum": [
+              "UNVERIFIED",
+              "IN_PROGRESS",
+              "VERIFIED",
+              "REJECTED",
+              "EXPIRED"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "SUSPENDED",
+              "DEACTIVATED"
+            ]
+          },
+          "canBook": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UpdateZoneRequest": {
+        "type": "object",
+        "properties": {
+          "outOfZoneDropoffFeeCents": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "outOfZoneDropoffAllowed": {
+            "type": "boolean"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UpdateVehicleRequest": {
+        "type": "object",
+        "properties": {
+          "color": {
+            "type": "string"
+          },
+          "licensePlate": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateVehicleClassRequest": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "baseDailyRateCents": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UpdateIncidentRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "IN_REVIEW",
+              "RESOLVED",
+              "DISMISSED"
+            ]
+          },
+          "resolutionNotes": {
+            "type": "string"
+          },
+          "chargedAmountCents": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "UpdateCustomerStatusRequest": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "SUSPENDED",
+              "DEACTIVATED"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "AdminCustomerDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date"
+          },
+          "licenseNumber": {
+            "type": "string"
+          },
+          "licenseState": {
+            "type": "string"
+          },
+          "licenseExpiresOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "verificationStatus": {
+            "type": "string",
+            "enum": [
+              "UNVERIFIED",
+              "IN_PROGRESS",
+              "VERIFIED",
+              "REJECTED",
+              "EXPIRED"
+            ]
+          },
+          "verificationCompletedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "SUSPENDED",
+              "DEACTIVATED"
+            ]
+          },
+          "stripeCustomerId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ZoneContainsResponse": {
+        "type": "object",
+        "properties": {
+          "inZone": {
+            "type": "boolean"
+          },
+          "zoneId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "zoneName": {
+            "type": "string"
+          }
+        }
+      },
+      "PublicZoneResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "boundary": {
+            "$ref": "#/components/schemas/PolygonGeoJson"
+          },
+          "center": {
+            "$ref": "#/components/schemas/PointGeoJson"
+          }
+        }
+      },
+      "AvailableClassResponse": {
+        "type": "object",
+        "properties": {
+          "classId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "drivetrain": {
+            "type": "string",
+            "enum": [
+              "ICE",
+              "HYBRID",
+              "EV"
+            ]
+          },
+          "seats": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "luggageCapacity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "countAvailable": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "startingDailyRateCents": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "representativePhotoUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "Pageable": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PageTripResponse": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TripResponse"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SortObject"
+            }
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PageableObject": {
+        "type": "object",
+        "properties": {
+          "paged": {
+            "type": "boolean"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unpaged": {
+            "type": "boolean"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sort": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SortObject"
+            }
+          }
+        }
+      },
+      "SortObject": {
+        "type": "object",
+        "properties": {
+          "direction": {
+            "type": "string"
+          },
+          "nullHandling": {
+            "type": "string"
+          },
+          "ascending": {
+            "type": "boolean"
+          },
+          "property": {
+            "type": "string"
+          },
+          "ignoreCase": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PageBookingResponse": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BookingResponse"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SortObject"
+            }
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PageVehicleResponse": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VehicleResponse"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SortObject"
+            }
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "LedgerEntryView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "entryType": {
+            "type": "string",
+            "enum": [
+              "DEPOSIT_HELD",
+              "DEPOSIT_CAPTURED",
+              "DEPOSIT_RELEASED",
+              "RENTAL_CHARGED",
+              "OVERAGE_CHARGED",
+              "INCIDENT_CHARGED",
+              "REFUND_ISSUED",
+              "DISPUTE_CHARGEBACK",
+              "MANUAL_ADJUSTMENT"
+            ]
+          },
+          "amountCents": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "PageLedgerEntryView": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LedgerEntryView"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SortObject"
+            }
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PageIncidentResponse": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IncidentResponse"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SortObject"
+            }
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AdminCustomerSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "verificationStatus": {
+            "type": "string",
+            "enum": [
+              "UNVERIFIED",
+              "IN_PROGRESS",
+              "VERIFIED",
+              "REJECTED",
+              "EXPIRED"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "SUSPENDED",
+              "DEACTIVATED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PageAdminCustomerSummary": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminCustomerSummary"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SortObject"
+            }
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearer-jwt": {
+        "type": "http",
+        "description": "Customer JWT access token.",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "session-cookie": {
+        "type": "apiKey",
+        "description": "Admin session cookie.",
+        "name": "SESSION",
+        "in": "cookie"
+      }
+    }
+  }
+}

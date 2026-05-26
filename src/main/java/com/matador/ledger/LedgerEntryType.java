@@ -1,0 +1,13 @@
+package com.matador.ledger;
+
+public enum LedgerEntryType {
+    DEPOSIT_HELD,
+    DEPOSIT_CAPTURED,
+    DEPOSIT_RELEASED,
+    RENTAL_CHARGED,
+    OVERAGE_CHARGED,
+    INCIDENT_CHARGED,
+    REFUND_ISSUED,
+    DISPUTE_CHARGEBACK,
+    MANUAL_ADJUSTMENT
+}

@@ -220,6 +220,33 @@ public class CustomerService {
         return mapper.toDetail(customer);
     }
 
+    // ---- Stripe customer linkage (used by the payment module) ----
+
+    @Transactional
+    public void linkStripeCustomer(UUID customerId, String stripeCustomerId) {
+        require(customerId).linkStripeCustomer(stripeCustomerId);
+    }
+
+    @Transactional(readOnly = true)
+    public java.util.Optional<String> stripeCustomerId(UUID customerId) {
+        return java.util.Optional.ofNullable(require(customerId).getStripeCustomerId());
+    }
+
+    @Transactional(readOnly = true)
+    public String customerEmail(UUID customerId) {
+        return require(customerId).getEmail();
+    }
+
+    @Transactional(readOnly = true)
+    public boolean canBook(UUID customerId) {
+        return require(customerId).canBook();
+    }
+
+    @Transactional(readOnly = true)
+    public String customerPhone(UUID customerId) {
+        return require(customerId).getPhone();
+    }
+
     // ---- Verification lifecycle (driven by identity events) ----
 
     @Transactional
