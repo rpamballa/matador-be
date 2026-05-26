@@ -1,0 +1,104 @@
+spring:
+  application:
+    name: matador-backend
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/matador}
+    username: ${SPRING_DATASOURCE_USERNAME:matador}
+    password: ${SPRING_DATASOURCE_PASSWORD:matador}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+        format_sql: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  mail:
+    host: ${SPRING_MAIL_HOST:localhost}
+    port: ${SPRING_MAIL_PORT:1025}
+  jackson:
+    default-property-inclusion: non_null
+    property-naming-strategy: SNAKE_CASE
+  modulith:
+    events:
+      jdbc:
+        # The event_publication table is created by Flyway (V4) so it exists before
+        # Hibernate schema validation; the built-in initializer is therefore disabled.
+        schema-initialization:
+          enabled: false
+
+server:
+  port: 8080
+  forward-headers-strategy: framework
+  error:
+    include-message: never
+    include-stacktrace: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+
+sentry:
+  dsn: ${SENTRY_DSN:}
+  environment: ${SENTRY_ENVIRONMENT:dev}
+  traces-sample-rate: 0.0
+
+matador:
+  jwt:
+    private-key-pem: ${JWT_PRIVATE_KEY:}
+    public-key-pem: ${JWT_PUBLIC_KEY:}
+    access-ttl-minutes: 15
+    refresh-ttl-days: 30
+    issuer: https://api.matador.com
+  stripe:
+    secret-key: ${STRIPE_SECRET_KEY:}
+    webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+    identity-webhook-secret: ${STRIPE_IDENTITY_WEBHOOK_SECRET:}
+  smartcar:
+    client-id: ${SMARTCAR_CLIENT_ID:}
+    client-secret: ${SMARTCAR_CLIENT_SECRET:}
+    webhook-secret: ${SMARTCAR_WEBHOOK_SECRET:}
+  twilio:
+    account-sid: ${TWILIO_ACCOUNT_SID:}
+    auth-token: ${TWILIO_AUTH_TOKEN:}
+    from-number: ${TWILIO_FROM_NUMBER:}
+  postmark:
+    server-token: ${POSTMARK_SERVER_TOKEN:}
+    from-address: ${POSTMARK_FROM_ADDRESS:no-reply@matador.com}
+  storage:
+    r2-account-id: ${R2_ACCOUNT_ID:}
+    r2-access-key: ${R2_ACCESS_KEY:}
+    r2-secret-key: ${R2_SECRET_KEY:}
+    r2-bucket: ${R2_BUCKET:}
+    r2-public-base-url: ${R2_PUBLIC_BASE_URL:}
+  cipher:
+    key-base64: ${ENCRYPTION_KEY_BASE64:}
+  pricing:
+    quote-ttl-minutes: 15
+    tax-rate-bps: 675
+    deposit-min-cents: 30000
+    deposit-percent-bps: 3000
+  policy:
+    min-customer-age: 21
+    min-booking-hours: 4
+    max-booking-days: 30
+    pickup-lead-time-minutes: 120
+    no-show-after-minutes: 120

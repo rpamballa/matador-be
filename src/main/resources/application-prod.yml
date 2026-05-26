@@ -1,0 +1,15 @@
+springdoc:
+  # Live spec is generated/published via CI; UI is disabled in production.
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false
+
+sentry:
+  environment: prod
+  traces-sample-rate: 0.1
+
+logging:
+  level:
+    com.matador: INFO
+    root: WARN
